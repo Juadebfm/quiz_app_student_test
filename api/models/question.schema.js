@@ -37,11 +37,6 @@ const questionSchema = new Schema({
     required: [true, "Topic is required"],
     trim: true,
   },
-  createdBy: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: [true, "Creator is required"],
-  },
   createdAt: { type: Date, default: Date.now },
 });
 

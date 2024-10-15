@@ -1,11 +1,11 @@
 import Questions from "../models/question.schema.js";
-import { validateQuestion } from "../middleware/validate.js";
+import { questionSchema } from "../utils/validation.js";
 import { formatResponse } from "../utils/responseFormatter.js";
 
-export async function insertQuestions(req, res, next) {
+export async function insertQuestions(req, res) {
   try {
-    // Validate the question data
-    const { error } = validateQuestion(req.body);
+    // Validate the question data with Joi schema
+    const { error } = questionSchema.validate(req.body);
     if (error) {
       return res
         .status(400)
@@ -39,8 +39,7 @@ export async function insertQuestions(req, res, next) {
       .status(201)
       .json(formatResponse(true, "Question added successfully", newQuestion));
   } catch (error) {
-    // Log the error and pass it to the error handling middleware
     console.error("Error in insertQuestions:", error);
-    next(error);
+    return res.status(500).json(formatResponse(false, "Server error", error));
   }
 }
