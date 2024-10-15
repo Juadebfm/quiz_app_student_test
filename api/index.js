@@ -5,6 +5,7 @@ import { config } from "dotenv";
 import router from "./router/route.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import connect from "./database/conn.js";
+import authRoutes from "./router/authRoute.js";
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 config();
 
 app.use("/api", router);
+app.use("/api/auth", authRoutes);
 
 // Add error handling middleware
 app.use(errorHandler);
