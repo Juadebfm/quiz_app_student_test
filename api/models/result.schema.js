@@ -7,10 +7,10 @@ const resultSchema = new Schema({
     ref: "User",
     required: [true, "User reference is required"],
   },
-  quiz: {
-    type: Schema.Types.ObjectId,
-    ref: "Quiz",
-    required: [true, "Quiz reference is required"],
+  quizType: {
+    type: String,
+    required: true,
+    enum: ["random", "all", "filtered"],
   },
   answers: [
     {

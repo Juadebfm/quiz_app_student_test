@@ -13,7 +13,7 @@ const questionSchema = Joi.object({
 
 const resultSchema = Joi.object({
   user: Joi.string().required().trim(),
-  quiz: Joi.string().required().trim(),
+  quizType: Joi.string().required().trim(),
   answers: Joi.array()
     .items(
       Joi.object({

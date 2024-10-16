@@ -33,7 +33,8 @@ export const register = [
         username,
         email,
         password,
-        role: role === "admin" ? "admin" : "student", // Ensure only valid roles are set
+        role: role === "admin" ? "admin" : "student",
+        isAllowedRetake: false, // Set default value
       });
 
       // Generate token

@@ -1,14 +1,15 @@
 import Joi from "joi";
 
-export const registerSchema = Joi.object({
-  username: Joi.string().alphanum().min(3).max(30).required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")).required(),
+const registerSchema = Joi.object({
+  username: Joi.string().required().trim(),
+  email: Joi.string().email().required().trim().lowercase(),
+  password: Joi.string().required().min(6),
   role: Joi.string().valid("admin", "student").default("student"),
+  isAllowedRetake: Joi.boolean().default(false),
 });
 
-export const loginSchema = Joi.object({
-  email: Joi.string().email().required(),
+const loginSchema = Joi.object({
+  email: Joi.string().email().required().trim().lowercase(),
   password: Joi.string().required(),
 });
 
