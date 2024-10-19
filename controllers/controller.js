@@ -240,6 +240,7 @@ export async function saveResults(req, res) {
     let expectedQuestions;
     if (quizType === "random") {
       expectedQuestions = 35;
+      // For random quiz, course and topic are optional and can vary
     } else if (quizType === "all") {
       expectedQuestions = await Question.countDocuments();
     } else if (quizType === "filtered") {
@@ -257,20 +258,6 @@ export async function saveResults(req, res) {
               "At least one filter (course or topic) is required for filtered quiz type"
             )
           );
-      }
-
-      // Validate the incoming data
-      if (
-        !user ||
-        !Array.isArray(answers) ||
-        !timeTaken ||
-        !quizType ||
-        !course ||
-        !topic
-      ) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid data format" });
       }
 
       // Use the filter to count the number of questions
@@ -336,25 +323,26 @@ export async function saveResults(req, res) {
     const totalQuestions = answers.length;
     const percentageScore = (score / totalQuestions) * 100;
 
+    // Prepare result data
+    const resultData = {
+      user,
+      quizType,
+      answers: processedAnswers,
+      score,
+      totalQuestions,
+      percentageScore,
+      timeTaken,
+    };
+    if (course) resultData.course = course;
+    if (topic) resultData.topic = topic;
+
     // Update existing result or create new one
     let result;
     if (existingResult) {
-      existingResult.answers = processedAnswers;
-      existingResult.score = score;
-      existingResult.totalQuestions = totalQuestions;
-      existingResult.percentageScore = percentageScore;
-      existingResult.timeTaken = timeTaken;
+      Object.assign(existingResult, resultData);
       result = await existingResult.save();
     } else {
-      result = await Result.create({
-        user,
-        quizType,
-        answers: processedAnswers,
-        score,
-        totalQuestions,
-        percentageScore,
-        timeTaken,
-      });
+      result = await Result.create(resultData);
     }
 
     return res
