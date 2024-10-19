@@ -259,6 +259,20 @@ export async function saveResults(req, res) {
           );
       }
 
+      // Validate the incoming data
+      if (
+        !user ||
+        !Array.isArray(answers) ||
+        !timeTaken ||
+        !quizType ||
+        !course ||
+        !topic
+      ) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid data format" });
+      }
+
       // Use the filter to count the number of questions
       expectedQuestions = await Question.countDocuments(filter);
     } else {
@@ -349,7 +363,7 @@ export async function saveResults(req, res) {
   } catch (error) {
     console.error("Error in saveResults:", error);
     return res.status(500).json(
-      formatResponse(false, "Server error", {
+      formatResponse(false, "An error occurred while saving the results", {
         errorMessage: error.message,
         stack: error.stack,
       })
