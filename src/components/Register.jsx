@@ -26,6 +26,8 @@ function Register() {
       if (result.success) {
         localStorage.setItem("token", result.data.token);
         localStorage.setItem("user", JSON.stringify(result.data.user));
+        localStorage.setItem("userId", result.data.user._id); // Storing the user ID separately
+        console.log("User ID stored:", result.data.user._id); // Log for debugging
         toast.success("Registration successful!");
         navigate("/login");
       } else {

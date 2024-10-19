@@ -140,12 +140,12 @@ function Quiz() {
     const userId = localStorage.getItem("userId");
 
     const raw = JSON.stringify({
-      user: userId, // Dynamically using the stored user ID
+      user: userId,
       answers: formattedAnswers,
       timeTaken: timeTaken,
       quizType: "random",
-      course: "Web Development", // Set dynamically if needed
-      topic: "HTML", // Set dynamically if needed
+      course: "Web Development",
+      topic: "HTML",
     });
 
     const requestOptions = {
@@ -155,13 +155,19 @@ function Quiz() {
       redirect: "follow",
     };
 
-    console.log(raw);
+    console.log("Sending data:", raw);
 
     try {
       const response = await fetch(
         "https://quiz-snowy-psi.vercel.app/api/results",
         requestOptions
       );
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `HTTP error! status: ${response.status}, body: ${errorText}`
+        );
+      }
       const result = await response.json();
       if (result.success) {
         setQuizResults(result.data);
@@ -174,7 +180,7 @@ function Quiz() {
     } catch (error) {
       console.error("Error:", error);
       toast.error(
-        "An error occurred while submitting quiz results. Please try again."
+        `An error occurred while submitting quiz results: ${error.message}`
       );
     }
 

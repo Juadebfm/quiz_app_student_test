@@ -27,6 +27,7 @@ function Login() {
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
         localStorage.setItem("userId", user._id); // Storing the user ID separately
+        console.log("User ID stored:", user._id); // Log for debugging
         toast.success("Login successful!");
         navigate("/quiz");
       } else {
