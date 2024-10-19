@@ -217,8 +217,19 @@ export async function deleteQuestion(req, res) {
 
 // Save Results
 export async function saveResults(req, res) {
+  console.log("Received request body:", JSON.stringify(req.body, null, 2));
   try {
     const { user, answers, timeTaken, quizType, course, topic } = req.body;
+
+    // Log parsed data
+    console.log("Parsed data:", {
+      user,
+      answers: answers.length,
+      timeTaken,
+      quizType,
+      course,
+      topic,
+    });
 
     // Validate input
     if (
@@ -240,11 +251,9 @@ export async function saveResults(req, res) {
     let expectedQuestions;
     if (quizType === "random") {
       expectedQuestions = 35;
-      // For random quiz, course and topic are optional and can vary
     } else if (quizType === "all") {
       expectedQuestions = await Question.countDocuments();
     } else if (quizType === "filtered") {
-      // Build filter object based on provided course and/or topic
       const filter = {};
       if (course) filter.course = course;
       if (topic) filter.topic = topic;
@@ -260,7 +269,6 @@ export async function saveResults(req, res) {
           );
       }
 
-      // Use the filter to count the number of questions
       expectedQuestions = await Question.countDocuments(filter);
     } else {
       return res.status(400).json(formatResponse(false, "Invalid quiz type"));
