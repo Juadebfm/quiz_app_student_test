@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 function Register() {
   const [username, setUsername] = useState("");
@@ -51,7 +52,7 @@ function Register() {
         <div className="flex items-center flex-col justify-center mb-16">
           <img src="/logo.png" alt="" className="w-[70px] h-[70px]" />
           <span className="font-bold text-3xl capitalize mt-4">
-            Juadeb's Test App
+            Juadeb's Test App - Register
           </span>
         </div>
         <input
@@ -84,6 +85,12 @@ function Register() {
         >
           Register
         </button>
+        <Link to="/register" className="mt-4 mx-auto">
+          <span className="font-bold text-blue-500 hover:underline mr-2">
+            Click Here
+          </span>
+          If You Already Have An Account Already
+        </Link>
       </form>
     </div>
   );

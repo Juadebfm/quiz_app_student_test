@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -48,7 +49,7 @@ function Login() {
       </div>
       <form
         onSubmit={handleSubmit}
-        className="col-span-3 flex flex-col space-y-4 p-28"
+        className="col-span-3 flex flex-col  space-y-4 p-28"
       >
         <div className="flex items-center flex-col justify-center mb-16">
           <img src="/logo.png" alt="" className="w-[70px] h-[70px]" />
@@ -78,6 +79,13 @@ function Login() {
         >
           Login
         </button>
+
+        <Link to="/register" className="mt-4 mx-auto">
+          <span className="font-bold text-blue-500 hover:underline">
+            Click Here
+          </span>
+          If You Don't Have An Account Already
+        </Link>
       </form>
     </div>
   );

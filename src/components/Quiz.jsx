@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function Quiz() {
   const [questions, setQuestions] = useState([]);
@@ -13,6 +14,16 @@ function Quiz() {
   const [quizResults, setQuizResults] = useState(null);
   const [showInstructions, setShowInstructions] = useState(true);
   const [quizStarted, setQuizStarted] = useState(false);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      toast.error("User not authenticated. Please log in.");
+      navigate("/login");
+    }
+  }, [navigate]);
 
   useEffect(() => {
     if (quizStarted) {
@@ -61,6 +72,7 @@ function Quiz() {
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("Authentication token not found. Please log in again.");
+      navigate("/login");
       return;
     }
 
@@ -113,15 +125,18 @@ function Quiz() {
     }
   };
 
-  const endQuiz = async () => {
+  const endQuiz = async (reason = "Quiz completed") => {
     if (quizEnded) return; // Prevent multiple submissions
 
     setQuizEnded(true);
     const timeTaken = 15 * 60 - timeRemaining;
 
     const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Authentication token not found. Please log in again.");
+    const userId = localStorage.getItem("userId");
+
+    if (!token || !userId) {
+      toast.error("Authentication information not found. Please log in again.");
+      navigate("/login");
       return;
     }
 
@@ -137,8 +152,6 @@ function Quiz() {
           : -1, // Use -1 for unanswered questions
     }));
 
-    const userId = localStorage.getItem("userId");
-
     const raw = JSON.stringify({
       user: userId,
       answers: formattedAnswers,
@@ -148,14 +161,14 @@ function Quiz() {
       topic: "HTML",
     });
 
+    console.log("Sending data:", raw);
+
     const requestOptions = {
       method: "POST",
       headers: myHeaders,
       body: raw,
       redirect: "follow",
     };
-
-    console.log("Sending data:", raw);
 
     try {
       const response = await fetch(
