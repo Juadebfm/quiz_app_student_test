@@ -1,5 +1,28 @@
 const mongoose = require("mongoose");
 
+const ReviewSessionSchema = new mongoose.Schema(
+  {
+    scores: {
+      type: Map,
+      of: Number,
+    },
+    notes: {
+      type: Map,
+      of: String,
+    },
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    reviewDate: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: false }
+);
+
 const UserStatsSchema = new mongoose.Schema(
   {
     userId: {
@@ -22,6 +45,7 @@ const UserStatsSchema = new mongoose.Schema(
         ref: "QuizResult",
       },
     ],
+    reviewSessions: [ReviewSessionSchema],
   },
   { timestamps: true }
 );
