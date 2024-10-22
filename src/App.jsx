@@ -11,11 +11,15 @@ import Register from "./components/Register";
 import Login from "./components/Login";
 import Quiz from "./components/Quiz";
 import PrivateRoute from "./components/PrivateRoute";
+import ReviewPage from "./components/ReviewPage";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <Router>
-      <div className="bg-slate-200 text-[18px]">
+      <div className="bg-slate-200 text-[18px] min-h-screen">
+        <Toaster position="top-right" />
+
         <ToastContainer
           position="top-right"
           autoClose={5000}
@@ -35,6 +39,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Quiz />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/review"
+            element={
+              <PrivateRoute>
+                <ReviewPage />
               </PrivateRoute>
             }
           />

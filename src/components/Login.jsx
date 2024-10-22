@@ -6,10 +6,12 @@ import { Link } from "react-router-dom";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     const raw = JSON.stringify({ email, password });
     const requestOptions = {
       method: "POST",
@@ -19,18 +21,18 @@ function Login() {
 
     try {
       const response = await fetch(
-        "https://quiz-snowy-psi.vercel.app/api/auth/login",
+        "https://quiz-app-student-test.vercel.app/api/auth/login",
         requestOptions
       );
       const result = await response.json();
-      if (result.success) {
-        const { token, user } = result.data;
+      if (response.ok) {
+        const { token, user } = result;
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("userId", user._id); // Storing the user ID separately
-        console.log("User ID stored:", user._id); // Log for debugging
+        localStorage.setItem("userId", user.id);
+        console.log("User ID stored:", user.id);
         toast.success("Login successful!");
-        navigate("/quiz");
+        navigate(user.isAdmin ? "/admin" : "/quiz");
       } else {
         toast.error(
           result.message || "Login failed. Please check your credentials."
@@ -39,6 +41,8 @@ function Login() {
     } catch (error) {
       console.error("Error:", error);
       toast.error("An error occurred. Please try again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -49,7 +53,7 @@ function Login() {
       </div>
       <form
         onSubmit={handleSubmit}
-        className="col-span-3 flex flex-col  space-y-4 p-28"
+        className="col-span-3 flex flex-col space-y-4 p-28"
       >
         <div className="flex items-center flex-col justify-center mb-16">
           <img src="/logo.png" alt="" className="w-[70px] h-[70px]" />
@@ -75,13 +79,14 @@ function Login() {
         />
         <button
           type="submit"
-          className="py-3 px-5 bg-blue-500 text-white rounded w-[60%] mx-auto"
+          className="py-3 px-5 bg-blue-500 text-white rounded w-[60%] mx-auto disabled:bg-gray-400"
+          disabled={isLoading}
         >
-          Login
+          {isLoading ? "Logging in..." : "Login"}
         </button>
 
         <Link to="/register" className="mt-4 mx-auto">
-          <span className="font-bold text-blue-500 hover:underline">
+          <span className="font-bold text-blue-500 hover:underline mr-2">
             Click Here
           </span>
           If You Don't Have An Account Already

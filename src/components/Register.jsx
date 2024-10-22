@@ -4,14 +4,17 @@ import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 
 function Register() {
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const raw = JSON.stringify({ username, email, password });
+    setIsLoading(true);
+    const raw = JSON.stringify({ name, username, email, password });
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -20,16 +23,12 @@ function Register() {
 
     try {
       const response = await fetch(
-        "https://quiz-snowy-psi.vercel.app/api/auth/register",
+        "https://quiz-app-student-test.vercel.app/api/auth/register",
         requestOptions
       );
       const result = await response.json();
-      if (result.success) {
-        localStorage.setItem("token", result.data.token);
-        localStorage.setItem("user", JSON.stringify(result.data.user));
-        localStorage.setItem("userId", result.data.user._id); // Storing the user ID separately
-        console.log("User ID stored:", result.data.user._id); // Log for debugging
-        toast.success("Registration successful!");
+      if (response.ok) {
+        toast.success("Registration successful! Please log in.");
         navigate("/login");
       } else {
         toast.error(result.message || "Registration failed. Please try again.");
@@ -37,6 +36,8 @@ function Register() {
     } catch (error) {
       console.error("Error:", error);
       toast.error("An error occurred. Please try again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -55,6 +56,14 @@ function Register() {
             Juadeb's Test App - Register
           </span>
         </div>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Full Name"
+          required
+          className="py-3 px-5 border border-gray-300 rounded"
+        />
         <input
           type="text"
           value={username}
@@ -81,15 +90,16 @@ function Register() {
         />
         <button
           type="submit"
-          className="py-3 px-5 bg-blue-500 text-white rounded w-[60%] mx-auto"
+          className="py-3 px-5 bg-blue-500 text-white rounded w-[60%] mx-auto disabled:bg-gray-400"
+          disabled={isLoading}
         >
-          Register
+          {isLoading ? "Registering..." : "Register"}
         </button>
-        <Link to="/register" className="mt-4 mx-auto">
+        <Link to="/login" className="mt-4 mx-auto">
           <span className="font-bold text-blue-500 hover:underline mr-2">
             Click Here
           </span>
-          If You Already Have An Account Already
+          If You Already Have An Account
         </Link>
       </form>
     </div>

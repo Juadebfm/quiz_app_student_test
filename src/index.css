@@ -4,9 +4,9 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
+*,
+button {
   font-family: "Raleway", sans-serif;
-
   padding: 0;
   margin: 0;
 }
