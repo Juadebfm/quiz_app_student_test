@@ -47,17 +47,25 @@ function Login() {
   };
 
   return (
-    <div className="grid grid-cols-5 items-center justify-center h-screen bg-slate-200">
-      <div className="col-span-2">
-        <img src="/test.jpg" alt="" className="w-full h-screen object-cover" />
+    <div className="grid grid-cols-1 lg:grid-cols-5 items-center justify-center h-screen bg-slate-200">
+      <div className="hidden lg:block col-span-2">
+        <img
+          src="/test.jpg"
+          alt="Test"
+          className="w-full h-screen object-cover"
+        />
       </div>
       <form
         onSubmit={handleSubmit}
-        className="col-span-3 flex flex-col space-y-4 p-28"
+        className="col-span-3 flex flex-col space-y-4 p-8 lg:p-28 w-full max-w-lg mx-auto"
       >
-        <div className="flex items-center flex-col justify-center mb-16">
-          <img src="/logo.png" alt="" className="w-[70px] h-[70px]" />
-          <span className="font-bold text-3xl capitalize mt-4">
+        <div className="flex items-center flex-col justify-center mb-12 lg:mb-16">
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="w-[50px] lg:w-[70px] h-[50px] lg:h-[70px]"
+          />
+          <span className="font-bold text-2xl lg:text-3xl capitalize mt-4 text-center">
             Juadeb's Test App Login
           </span>
         </div>
@@ -67,7 +75,7 @@ function Login() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
           required
-          className="py-3 px-5 border border-gray-300 rounded"
+          className="py-3 px-5 border border-gray-300 rounded w-full"
         />
         <input
           type="password"
@@ -75,17 +83,17 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
           required
-          className="py-3 px-5 border border-gray-300 rounded"
+          className="py-3 px-5 border border-gray-300 rounded w-full"
         />
         <button
           type="submit"
-          className="py-3 px-5 bg-blue-500 text-white rounded w-[60%] mx-auto disabled:bg-gray-400"
+          className="py-3 px-5 bg-blue-500 text-white rounded w-full lg:w-[60%] mx-auto disabled:bg-gray-400"
           disabled={isLoading}
         >
           {isLoading ? "Logging in..." : "Login"}
         </button>
 
-        <Link to="/register" className="mt-4 mx-auto">
+        <Link to="/register" className="mt-4 mx-auto text-center">
           <span className="font-bold text-blue-500 hover:underline mr-2">
             Click Here
           </span>

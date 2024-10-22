@@ -289,17 +289,19 @@ const Quiz = () => {
     switch (step) {
       case "info":
         return (
-          <div className="bg-white shadow-md rounded flex items-center justify-center flex-col h-screen">
+          <div className="bg-white shadow-md rounded flex items-center justify-center flex-col h-screen px-[35px] lg:px-0">
             <img
               src="/logo.png"
               alt=""
               className="w-[70px] h-[70px] mb-4 animate-pulse duration-200"
             />
-            <h2 className="text-5xl mb-4 font-bold">Quiz Information</h2>
-            <p className="text-2xl mb-10">
+            <h2 className="text-2xl lg:text-5xl mb-4 font-bold">
+              Quiz Information
+            </h2>
+            <p className="text-xl lg:text-2xl mb-10 text-center lg:text-start">
               Welcome to the quiz! Here's some important information:
             </p>
-            <ul className="list-disc text-xl space-y-4 pl-5 mb-10 text-red-500 font-bold">
+            <ul className="list-disc text-base lg:text-xl space-y-4 pl-5 mb-10 text-red-500 font-bold">
               <li>This is a one-time quiz - you can only take it once.</li>
               <li>The quiz consists of multiple-choice questions.</li>
               <li>You have 20 minutes to complete the quiz.</li>
@@ -312,7 +314,7 @@ const Quiz = () => {
             </ul>
             <button
               onClick={handleConsent}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="bg-blue-500 hover:bg-blue-700 text-white text-sm lg:text-base font-bold p-5 rounded focus:outline-none focus:shadow-outline"
             >
               I understand and want to start the quiz
             </button>
@@ -320,22 +322,22 @@ const Quiz = () => {
         );
       case "completed":
         return (
-          <div className="bg-white shadow-md rounded h-screen ">
-            <div className="w-[60%] mx-auto flex flex-col items-center justify-center h-full">
+          <div className="bg-white shadow-md rounded h-screen px-[35px] lg:px-0">
+            <div className="w-full lg:w-[60%] mx-auto flex flex-col items-center justify-center h-full">
               <img
                 src="/logo.png"
                 alt=""
                 className="w-[70px] h-[70px] mb-4 animate-pulse duration-200"
               />
-              <h2 className="text-5xl mb-4 font-bold">
+              <h2 className="text-2xl lg:text-5xl mb-4 font-bold">
                 Quiz Already Completed
               </h2>
               <p className="mb-4 text-xl flex items-center flex-col justify-center">
-                <span className="font-mono text-2xl font-bold">
+                <span className="font-mono text-base lg:text-2xl font-bold">
                   Your final score was: {score?.score || 0} / {questions.length}
                 </span>
               </p>
-              <p className="text-gray-600 flex items-center justify-center gap-5 pt-16">
+              <p className="text-gray-600 flex flex-col lg:flex-row items-center justify-center gap-5 pt-16 text-center lg:text-start">
                 <span className="">
                   <GiLaserWarning size={50} />
                 </span>
@@ -346,7 +348,7 @@ const Quiz = () => {
               </p>
               <Link
                 to="/login"
-                className="mt-28 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                className="w-full lg:w-auto text-center mt-28 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
                 Back To Home
               </Link>
@@ -354,7 +356,16 @@ const Quiz = () => {
           </div>
         );
       case "quiz":
-        if (questions.length === 0) return <p>Loading questions...</p>;
+        if (questions.length === 0)
+          return (
+            <p className="bg-white shadow-md rounded flex items-center justify-center flex-col h-screen px-[35px] lg:px-0">
+              <img
+                src="/logo.png"
+                alt=""
+                className="w-[70px] h-[70px] mb-4 animate-spin duration-500"
+              />
+            </p>
+          );
         const question = questions[currentQuestion];
         const allQuestionsAnswered =
           Object.keys(userAnswers).length === questions.length;
@@ -403,7 +414,7 @@ const Quiz = () => {
               {allQuestionsAnswered && (
                 <button
                   onClick={submitQuiz}
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4"
+                  className="bg-green-500 hover:bg-green-700 text-white font-bold p-5 rounded mt-4"
                 >
                   Submit Quiz
                 </button>
@@ -444,8 +455,11 @@ const Quiz = () => {
           <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
             <div>
               <h2 className="text-2xl mb-4">Quiz Results</h2>
-              <p className="mb-4">
-                Your score: {score?.score || 0} out of {questions.length}
+              <p className="mb-4 text-2xl">
+                Your score:{" "}
+                <span className="font-mono text-blue-500">
+                  {score?.score || 0} out of {questions.length}
+                </span>
               </p>
             </div>
             {questions.map((question, index) => {
