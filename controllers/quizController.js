@@ -5,6 +5,7 @@ const {
 } = require("../validation/questionValidation");
 const QuizResult = require("../models/QuizResults");
 const UserStats = require("../models/UserStats");
+const User = require("../models/User"); // Add this at the top of your file
 
 // Add Questions
 exports.addQuestion = async (req, res) => {
@@ -225,13 +226,16 @@ exports.submitQuiz = async (req, res) => {
 
 // Add new endpoints for retrieving quiz results
 
+// Assuming you have a User model imported
+
 // Get results for a specific user
 exports.getUserQuizResults = async (req, res) => {
   try {
     const userId = req.params.userId || req.userId;
 
     const results = await QuizResult.findOne({ userId })
-      .select("userDetails attempts")
+      .populate("userId", "username email")
+      .select("userDetails attempts userId")
       .lean();
 
     if (!results) {
@@ -240,9 +244,28 @@ exports.getUserQuizResults = async (req, res) => {
         .json({ message: "No quiz results found for this user" });
     }
 
+    // Get the last attempt and calculate percentage
+    const lastAttempt = results.attempts[results.attempts.length - 1] || null;
+    const lastScore = lastAttempt
+      ? {
+          score: lastAttempt.score,
+          totalQuestions: lastAttempt.totalQuestions,
+          percentage: (
+            (lastAttempt.score / lastAttempt.totalQuestions) *
+            100
+          ).toFixed(2),
+          attemptDate: lastAttempt.createdAt,
+        }
+      : null;
+
     res.status(200).json({
       success: true,
-      userDetails: results.userDetails,
+      userDetails: {
+        ...results.userDetails,
+        username: results.userId?.username,
+        email: results.userId?.email,
+      },
+      lastScore,
       attempts: results.attempts,
     });
   } catch (error) {
@@ -255,22 +278,21 @@ exports.getUserQuizResults = async (req, res) => {
 // Get all quiz results (for admin/teacher)
 exports.getAllQuizResults = async (req, res) => {
   try {
-    // Add pagination
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // Add filters
     const filters = {};
     if (req.query.email) {
-      filters["userDetails.email"] = new RegExp(req.query.email, "i");
+      filters["userId.email"] = new RegExp(req.query.email, "i");
     }
     if (req.query.username) {
-      filters["userDetails.username"] = new RegExp(req.query.username, "i");
+      filters["userId.username"] = new RegExp(req.query.username, "i");
     }
 
     const results = await QuizResult.find(filters)
-      .select("userDetails attempts")
+      .populate("userId", "username email")
+      .select("userDetails attempts userId")
       .sort({ "attempts.createdAt": -1 })
       .skip(skip)
       .limit(limit)
@@ -278,13 +300,49 @@ exports.getAllQuizResults = async (req, res) => {
 
     const total = await QuizResult.countDocuments(filters);
 
+    // Map the results to include user details and last score
+    const formattedResults = results.map((result) => {
+      const lastAttempt = result.attempts[result.attempts.length - 1] || null;
+      const lastScore = lastAttempt
+        ? {
+            score: lastAttempt.score,
+            totalQuestions: lastAttempt.totalQuestions,
+            percentage: (
+              (lastAttempt.score / lastAttempt.totalQuestions) *
+              100
+            ).toFixed(2),
+            attemptDate: lastAttempt.createdAt,
+          }
+        : null;
+
+      return {
+        ...result,
+        userDetails: {
+          ...result.userDetails,
+          username: result.userId?.username,
+          email: result.userId?.email,
+        },
+        lastScore,
+        totalAttempts: result.attempts.length,
+        averageScore:
+          result.attempts.length > 0
+            ? (
+                result.attempts.reduce(
+                  (acc, curr) => acc + (curr.score / curr.totalQuestions) * 100,
+                  0
+                ) / result.attempts.length
+              ).toFixed(2)
+            : null,
+      };
+    });
+
     res.status(200).json({
       success: true,
-      count: results.length,
+      count: formattedResults.length,
       total,
       pages: Math.ceil(total / limit),
       currentPage: page,
-      results: results,
+      results: formattedResults,
     });
   } catch (error) {
     res
