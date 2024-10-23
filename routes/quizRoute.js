@@ -6,6 +6,8 @@ const {
   getRandomQuestions,
   submitQuiz,
   nuke,
+  getUserQuizResults,
+  getAllQuizResults,
 } = require("../controllers/quizController");
 const { authenticate } = require("../middleware/authMiddleware");
 const { isAdmin } = require("../middleware/adminMiddleware");
@@ -17,5 +19,8 @@ router.get("/questions", authenticate, getQuestions);
 router.get("/random", authenticate, getRandomQuestions);
 router.post("/submit", authenticate, submitQuiz);
 router.delete("/nuke_questions", authenticate, isAdmin, nuke);
+// New routes for retrieving results
+router.get("/results/user/:userId?", authenticate, getUserQuizResults);
+router.get("/results/all", authenticate, isAdmin, getAllQuizResults);
 
 module.exports = router;

@@ -162,58 +162,26 @@ exports.submitQuiz = async (req, res) => {
   const userId = req.userId;
 
   try {
-    // Check user's submission attempts for today
+    // Get user details first
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Rest of your existing validation logic...
     const today = new Date();
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-    const userResult = await QuizResult.findOne({ userId });
+    // Prepare user details object
+    const userDetails = {
+      username: user.username,
+      email: user.email,
+      fullName: user.fullName, // If you have these fields in your User model
+      studentId: user.studentId,
+    };
 
-    if (userResult) {
-      const attemptsToday = userResult.attempts.filter(
-        (attempt) =>
-          attempt.createdAt >= startOfDay && attempt.createdAt < endOfDay
-      ).length;
-
-      if (attemptsToday >= 3) {
-        return res.status(403).json({
-          message:
-            "You have exceeded the maximum number of attempts for today.",
-        });
-      }
-    }
-
-    // Fetch the questions
-    const questionIds = answers.map((answer) => answer.questionId);
-    const questions = await Question.find({ _id: { $in: questionIds } });
-
-    if (questions.length !== answers.length) {
-      return res
-        .status(400)
-        .json({ message: "Some question IDs are invalid." });
-    }
-
-    // Calculate score and create detailed results
-    let score = 0;
-    const detailedResults = answers.map((answer) => {
-      const question = questions.find(
-        (q) => q._id.toString() === answer.questionId
-      );
-      const isCorrect =
-        question && answer.userAnswer === question.correctAnswerIndex;
-      if (isCorrect) score++;
-      return {
-        questionId: answer.questionId,
-        userAnswer: answer.userAnswer,
-        correctAnswer: question ? question.correctAnswerIndex : null,
-        isCorrect,
-      };
-    });
-
-    // Calculate percentage score
-    const percentageScore = (score / questions.length) * 100;
-
-    // Create or update the quiz result
+    // Calculate scores and create new attempt...
     const newAttempt = {
       answers: detailedResults,
       score,
@@ -222,21 +190,24 @@ exports.submitQuiz = async (req, res) => {
       createdAt: new Date(),
     };
 
+    // Update or create quiz result with user details
     const updatedResult = await QuizResult.findOneAndUpdate(
       { userId },
       {
+        $set: { userDetails }, // Add/update user details
         $push: { attempts: newAttempt },
       },
-      { upsert: true, new: true }
+      {
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true,
+      }
     );
 
-    const attemptsToday = updatedResult.attempts.filter(
-      (attempt) =>
-        attempt.createdAt >= startOfDay && attempt.createdAt < endOfDay
-    ).length;
-
+    // Return response with user details included
     res.status(200).json({
       message: "Quiz submitted successfully.",
+      userDetails: updatedResult.userDetails,
       score,
       totalQuestions: questions.length,
       answeredQuestions: answers.length,
@@ -249,6 +220,76 @@ exports.submitQuiz = async (req, res) => {
     res
       .status(500)
       .json({ message: "An error occurred while submitting the quiz." });
+  }
+};
+
+// Add new endpoints for retrieving quiz results
+
+// Get results for a specific user
+exports.getUserQuizResults = async (req, res) => {
+  try {
+    const userId = req.params.userId || req.userId;
+
+    const results = await QuizResult.findOne({ userId })
+      .select("userDetails attempts")
+      .lean();
+
+    if (!results) {
+      return res
+        .status(404)
+        .json({ message: "No quiz results found for this user" });
+    }
+
+    res.status(200).json({
+      success: true,
+      userDetails: results.userDetails,
+      attempts: results.attempts,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching quiz results", error: error.message });
+  }
+};
+
+// Get all quiz results (for admin/teacher)
+exports.getAllQuizResults = async (req, res) => {
+  try {
+    // Add pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Add filters
+    const filters = {};
+    if (req.query.email) {
+      filters["userDetails.email"] = new RegExp(req.query.email, "i");
+    }
+    if (req.query.username) {
+      filters["userDetails.username"] = new RegExp(req.query.username, "i");
+    }
+
+    const results = await QuizResult.find(filters)
+      .select("userDetails attempts")
+      .sort({ "attempts.createdAt": -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const total = await QuizResult.countDocuments(filters);
+
+    res.status(200).json({
+      success: true,
+      count: results.length,
+      total,
+      pages: Math.ceil(total / limit),
+      currentPage: page,
+      results: results,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching quiz results", error: error.message });
   }
 };
 
